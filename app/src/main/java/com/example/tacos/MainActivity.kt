@@ -1,5 +1,10 @@
-package com.example.tacos
+/**
+ *  File Name: MainActivity.kt
+ *  Project Name: TacoApp
+ *  Copyright @ Hanlin Hu 2019
+ */
 
+package com.example.tacos
 
 import android.app.Activity
 import android.content.Intent
@@ -9,13 +14,11 @@ import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
-
 class MainActivity : AppCompatActivity() {
     companion object{const val REQUEST_IMAGE_CAPTURE = 1 }
     private var count = 1
     private val textList: MutableList<String> = ArrayList()
-
-    private val tacoHashMap: HashMap<String, tacoType> = HashMap()
+    private val tacoHashMap: HashMap<String, TacoType> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +39,12 @@ class MainActivity : AppCompatActivity() {
             val h: Int = 1
             val conf = Bitmap.Config.ARGB_8888 // see other conf types
             val bmp = Bitmap.createBitmap(w, h, conf) // this creates a MUTABLE bitmap
-            tacoHashMap[fileContents]=tacoType(bmp, false)
 
+            // Add to the HashMap
+            tacoHashMap[fileContents]=TacoType(bmp, false)
+
+            // 3rd part lib: https://github.com/webianks/ScrollChoice
+            // MIT licence
             scrollChoice.addItems(textList,2)
 
             // Reset the content
@@ -45,9 +52,11 @@ class MainActivity : AppCompatActivity() {
             giveMeTaco.text = fileContents
         }
         scrollChoice.setOnItemSelectedListener { scrollChoice, position, name ->
+            // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = ""
 
+            // Switch the context showing
             if (tacoHashMap[name]!!.isImage == false) {
                 giveMeTaco.text = name
             } else {
@@ -73,9 +82,13 @@ class MainActivity : AppCompatActivity() {
             var imgNameHead:String = "Image Memo"
             var countString = count.toString()
             var imgName:String = "$imgNameHead $countString"
-            tacoHashMap[imgName] = tacoType(imageBitmap, true)
+
+            // Add to the HashMap
+            tacoHashMap[imgName] = TacoType(imageBitmap, true)
             textList.add(imgName)
             scrollChoice.addItems(textList,2)
+
+            // Increase the image name number
             count++
 
             // Reset the content
