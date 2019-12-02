@@ -8,4 +8,4 @@ package com.example.tacos
 
 import android.graphics.Bitmap
 
-data class TacoType(val image: Bitmap, val isImage: Boolean)
+data class TacoType(val name: String, val image: Bitmap, val isImage: Boolean)

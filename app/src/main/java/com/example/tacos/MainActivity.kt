@@ -16,17 +16,19 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object{const val REQUEST_IMAGE_CAPTURE = 1 }
-    private var count = 1
+    private var count:Int = 0
+    private var selectedItem:Int = 0
     private val textList: MutableList<String> = ArrayList()
-    private val tacoHashMap: HashMap<String, TacoType> = HashMap()
+    private val tacoHashMap: HashMap<Int, TacoType> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        deleteButton.setOnClickListener {
+        snapButton.setOnClickListener {
             dispatchTakePictureIntent()
         }
+
         add.setOnClickListener {
             var fileContents = editText.text.toString()
             // reset editText
@@ -41,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             val bmp = Bitmap.createBitmap(w, h, conf) // this creates a MUTABLE bitmap
 
             // Add to the HashMap
-            tacoHashMap[fileContents]=TacoType(bmp, false)
+            tacoHashMap[count]=TacoType(fileContents, bmp, false)
 
             // 3rd part lib: https://github.com/webianks/ScrollChoice
             // MIT licence
@@ -50,17 +52,36 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = fileContents
+            selectedItem = count
         }
+
+        deleteButton.setOnClickListener {
+            // Position Changing Bug
+
+
+
+
+            // Remove the selected item from both data structures
+            textList.removeAt(selectedItem)
+            tacoHashMap.remove(selectedItem)
+
+            // Reset the content
+            imageView.setImageResource(0)
+            giveMeTaco.text = ""
+            scrollChoice.addItems(textList,2)
+        }
+
         scrollChoice.setOnItemSelectedListener { scrollChoice, position, name ->
             // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = ""
+            selectedItem = position
 
             // Switch the context showing
-            if (tacoHashMap[name]!!.isImage == false) {
+            if (tacoHashMap[selectedItem]!!.isImage == false) {
                 giveMeTaco.text = name
             } else {
-                imageView.setImageBitmap(tacoHashMap[name]!!.image)
+                imageView.setImageBitmap(tacoHashMap[selectedItem]!!.image)
             }
         }
     }
@@ -80,13 +101,13 @@ class MainActivity : AppCompatActivity() {
 
             // Concatenate a image name
             var imgNameHead:String = "Image Memo"
-            var countString = count.toString()
+            var countString = (count + 1).toString() // Name string starts from image memo 1
             var imgName:String = "$imgNameHead $countString"
 
+            selectedItem = count
             // Add to the HashMap
-            tacoHashMap[imgName] = TacoType(imageBitmap, true)
+            tacoHashMap[selectedItem] = TacoType(imgName, imageBitmap, true)
             textList.add(imgName)
-            scrollChoice.addItems(textList,2)
 
             // Increase the image name number
             count++
@@ -94,6 +115,9 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             giveMeTaco.text = ""
             imageView.setImageBitmap(imageBitmap)
+
+
+            scrollChoice.addItems(textList,2)
         }
     }
 

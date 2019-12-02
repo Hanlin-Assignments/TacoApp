@@ -5,4 +5,5 @@
     <string name="add">Add!</string>
     <string name="delete">Delete Selected!</string>
     <string name="hello">Hello World!</string>
+    <string name="snap">Snap!</string>
 </resources>
