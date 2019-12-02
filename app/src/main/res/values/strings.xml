@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">tacos</string>
+    <string name="todo_app_tm">Todo App (TM)</string>
+    <string name="name">Name</string>
+    <string name="add">Add!</string>
+    <string name="delete">Delete Selected!</string>
+    <string name="hello">Hello World!</string>
+</resources>

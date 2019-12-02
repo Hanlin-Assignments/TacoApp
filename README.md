@@ -1,2 +1,1 @@
-# TacoApp
-Assignment 3 Finish the TacoApp from Template
+Tacos is a terrible note-taking app that is completely broken and needs some help. Please send pull requests!
