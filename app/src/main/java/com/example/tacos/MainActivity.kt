@@ -16,10 +16,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object{const val REQUEST_IMAGE_CAPTURE = 1 }
-    private var count:Int = 0
-    private var selectedItem:Int = 0
+    private var count = 1
+    private lateinit var selectedItem:String
     private val textList: MutableList<String> = ArrayList()
-    private val tacoHashMap: HashMap<Int, TacoType> = HashMap()
+    private val tacoHashMap: HashMap<String, TacoType> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             val bmp = Bitmap.createBitmap(w, h, conf) // this creates a MUTABLE bitmap
 
             // Add to the HashMap
-            tacoHashMap[count]=TacoType(fileContents, bmp, false)
+            tacoHashMap[fileContents]=TacoType(bmp, false)
 
             // 3rd part lib: https://github.com/webianks/ScrollChoice
             // MIT licence
@@ -52,17 +52,11 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = fileContents
-            selectedItem = count
+            selectedItem = fileContents
         }
 
         deleteButton.setOnClickListener {
-            // Position Changing Bug
-
-
-
-
-            // Remove the selected item from both data structures
-            textList.removeAt(selectedItem)
+            textList.remove(selectedItem)
             tacoHashMap.remove(selectedItem)
 
             // Reset the content
@@ -75,13 +69,13 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = ""
-            selectedItem = position
+            selectedItem = name
 
             // Switch the context showing
-            if (tacoHashMap[selectedItem]!!.isImage == false) {
+            if (tacoHashMap[name]!!.isImage == false) {
                 giveMeTaco.text = name
             } else {
-                imageView.setImageBitmap(tacoHashMap[selectedItem]!!.image)
+                imageView.setImageBitmap(tacoHashMap[name]!!.image)
             }
         }
     }
@@ -101,12 +95,11 @@ class MainActivity : AppCompatActivity() {
 
             // Concatenate a image name
             var imgNameHead:String = "Image Memo"
-            var countString = (count + 1).toString() // Name string starts from image memo 1
+            var countString = count.toString()
             var imgName:String = "$imgNameHead $countString"
 
-            selectedItem = count
             // Add to the HashMap
-            tacoHashMap[selectedItem] = TacoType(imgName, imageBitmap, true)
+            tacoHashMap[imgName] = TacoType(imageBitmap, true)
             textList.add(imgName)
 
             // Increase the image name number
@@ -115,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             giveMeTaco.text = ""
             imageView.setImageBitmap(imageBitmap)
-
+            selectedItem = imgName
 
             scrollChoice.addItems(textList,2)
         }
