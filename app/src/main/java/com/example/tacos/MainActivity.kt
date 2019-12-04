@@ -16,10 +16,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     companion object{const val REQUEST_IMAGE_CAPTURE = 1 }
-    private var count = 1
-    private lateinit var selectedItem:String
+    private var count = 0 // Count number of Images
+    private lateinit var selectedItemText:String
+    private var selectedItemPosition = 0
     private val textList: MutableList<String> = ArrayList()
-    private val tacoHashMap: HashMap<String, TacoType> = HashMap()
+    private val tacoList: MutableList<TacoType> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,51 +32,88 @@ class MainActivity : AppCompatActivity() {
 
         add.setOnClickListener {
             var fileContents = editText.text.toString()
-            // reset editText
+            // Reset editText
             editText.text = null
 
-            textList.add(fileContents)
+            // Force user cannot add empty item
+            if (fileContents!="") {
+                // Add to text list
+                textList.add(fileContents)
 
-            // Create a dummy image
-            val w: Int = 1
-            val h: Int = 1
-            val conf = Bitmap.Config.ARGB_8888 // see other conf types
-            val bmp = Bitmap.createBitmap(w, h, conf) // this creates a MUTABLE bitmap
+                // Create a dummy image
+                val w: Int = 1
+                val h: Int = 1
+                val conf = Bitmap.Config.ARGB_8888 // see other conf types
+                val bmp = Bitmap.createBitmap(w, h, conf) // this creates a MUTABLE bitmap
 
-            // Add to the HashMap
-            tacoHashMap[fileContents]=TacoType(bmp, false)
+                // Add to the TacoList
+                tacoList.add(TacoType(fileContents, bmp, false))
 
-            // 3rd part lib: https://github.com/webianks/ScrollChoice
-            // MIT licence
-            scrollChoice.addItems(textList,2)
+                // Reset the content
+                imageView.setImageResource(0)
+                giveMeTaco.text = fileContents
+                selectedItemText = fileContents
 
-            // Reset the content
-            imageView.setImageResource(0)
-            giveMeTaco.text = fileContents
-            selectedItem = fileContents
+                // Add text item to the end of the list
+                selectedItemPosition = textList.size - 1
+
+                // 3rd part lib: https://github.com/webianks/ScrollChoice
+                // MIT licence
+                scrollChoice.addItems(textList, selectedItemPosition)
+            }
         }
 
         deleteButton.setOnClickListener {
-            textList.remove(selectedItem)
-            tacoHashMap.remove(selectedItem)
+            if (textList.size > 0 && selectedItemText != "" ) {
+                // Remove selected item from both lists
+                textList.removeAt(selectedItemPosition)
+                tacoList.removeAt(selectedItemPosition)
 
-            // Reset the content
-            imageView.setImageResource(0)
-            giveMeTaco.text = ""
-            scrollChoice.addItems(textList,2)
+                // Reset the content
+                imageView.setImageResource(0)
+                giveMeTaco.text = ""
+                if (textList.size > 1 && selectedItemPosition !=0 ) {
+                    // This case the selective cursor will move one step up
+                    selectedItemPosition--
+                    selectedItemText = textList[selectedItemPosition]
+                } else if (textList.size == 1) {
+                    selectedItemText = textList[0]
+                    selectedItemPosition = 0
+                } else if (textList.size == 0) {
+                    selectedItemText = ""
+                    selectedItemPosition = 0
+                } else {
+                    // textList.size > 1 && selectedItemPosition == 0
+                    // Which means now there are more then one item in the spinner
+                    // and the selective cursor is on the top
+                    // Then, move down one step after deletion
+                    selectedItemText = textList[selectedItemPosition]
+                }
+                scrollChoice.addItems(textList, selectedItemPosition)
+
+                if (textList.size >= 1) {
+                    // Switch the context showing
+                    if (tacoList[selectedItemPosition]!!.isImage == false) {
+                        giveMeTaco.text = selectedItemText
+                    } else {
+                        imageView.setImageBitmap(tacoList[selectedItemPosition]!!.image)
+                    }
+                }
+            }
         }
 
         scrollChoice.setOnItemSelectedListener { scrollChoice, position, name ->
             // Reset the content
             imageView.setImageResource(0)
             giveMeTaco.text = ""
-            selectedItem = name
+            selectedItemText = name
+            selectedItemPosition = position
 
             // Switch the context showing
-            if (tacoHashMap[name]!!.isImage == false) {
+            if (tacoList[selectedItemPosition]!!.isImage == false) {
                 giveMeTaco.text = name
             } else {
-                imageView.setImageBitmap(tacoHashMap[name]!!.image)
+                imageView.setImageBitmap(tacoList[selectedItemPosition]!!.image)
             }
         }
     }
@@ -95,11 +133,11 @@ class MainActivity : AppCompatActivity() {
 
             // Concatenate a image name
             var imgNameHead:String = "Image Memo"
-            var countString = count.toString()
+            var countString = (count + 1).toString()
             var imgName:String = "$imgNameHead $countString"
 
             // Add to the HashMap
-            tacoHashMap[imgName] = TacoType(imageBitmap, true)
+            tacoList.add(TacoType(imgName, imageBitmap, true))
             textList.add(imgName)
 
             // Increase the image name number
@@ -108,12 +146,14 @@ class MainActivity : AppCompatActivity() {
             // Reset the content
             giveMeTaco.text = ""
             imageView.setImageBitmap(imageBitmap)
-            selectedItem = imgName
+            selectedItemText = imgName
 
-            scrollChoice.addItems(textList,2)
+            // Add Image item to the end of the list
+            selectedItemPosition = textList.size - 1
+
+            scrollChoice.addItems(textList, selectedItemPosition)
         }
     }
-
 }
 
 
